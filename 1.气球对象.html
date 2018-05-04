@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<style>
+			html,body{height:100%;}
+			body{
+				position:relative; /*父元素相对定位*/
+				overflow:hidden;  /*溢出隐藏*/
+			}
+			.balloon{
+				position:absolute;  /*子元素绝对定位*/
+				width:96px;
+				height:122px;
+				background-image: url(img/balloon.png);
+				background-repeat: no-repeat;
+				/*background-position: 0px -122px;*/
+			}
+		</style>
+	</head>
+	<body>
+		<script>
+			//每个图片的位置坐标
+			var markList = {
+				"1" : "0px 0px",
+				"2" : "-96px 0px",
+				"3" : "-192px 0px",
+				"4" : "-288px 0px",
+				"5" : "opx -122px",
+				"6" : "-96px -122px",
+				"7" : "-192px -122px",
+				"8" : "-288px -122px"
+			}
+			
+			//取一个m到n之间的随机正数
+			function r(m,n){
+				//[m,n]
+				var r1 = Math.random(); // [ 0, 1) 随机数
+				var r2 = (n-m+1)*r1   ;//  [ 0, n-m+1)
+				var r3 = m + r2       ;//  [ m, n+1)
+				var r4 = Math.floor(r3);// [ m, n] 向下取整
+				return r4;
+			}
+			
+			//测试r函数
+//			var arr = [];
+//			var obj = {};
+//			for(var i = 0;i < 1000;i++){
+//				var t = r(1,8);
+//				arr.push( t );
+//				if(obj[t]){
+//					obj[t] = obj[t] + 1;
+//				}
+//				else{
+//					obj[t] = 1;
+//				}
+//			}
+
+			//打印随机的频率
+			//console.info(obj);
+			
+			//气球函数的构造器
+			function Balloon(){
+
+				//4,元素：ele,用来承载气球的dom元素
+				this.ele = document.createElement("div");
+				this.ele.className = "balloon";
+				document.body.appendChild(this.ele);
+				
+				//调用重生方法，精简代码量
+				this.birth();
+			}
+			
+			//用构造器+原型的方式去创建气球对象
+			Balloon.prototype = {
+				constructor:Balloon,
+				move:function(){
+					//不断地减少y值
+					this.y = this.y - this.speed;
+					if(this.y < -122){
+						//飞出界，要重生
+						this.birth();
+					}
+					else{
+						//反馈到dom元素上
+					    this.ele.style.top = this.y + "px";
+					}
+					
+				},
+				blow:function(){
+					
+				},
+				birth:function(){
+					//属性
+					//1,分值：（对应不同的背景图），mark
+					this.mark = r(1,8);
+					//2,速度：speed 让速度与分值成正比
+					this.speed = this.mark;
+					//3,坐标：x，y 随机的位置
+					this.x = r(0,document.body.offsetWidth - 96);
+					//this.y = document.body.offsetHeight + 2*122;
+					this.y = 500;
+					//根据分值设置背景图
+					this.ele.style.backgroundPosition = markList[ this.mark ];
+					//反馈到dom元素上
+					this.ele.style.left = this.x + "px";
+					this.ele.style.top = this.y + "px";
+					
+					
+//					this.mark = r(1,8);
+//					this.speed = this.mark;
+//					this.x = r(0,document.body.offsetWidth -96 );
+//					this.y = 500;
+//					this.ele.style.backgroundPosition = markList[this.mark];
+//					this.ele.style.left = this.x + "px";
+//					this.ele.style.top = this.y + "px";
+				}
+			}
+			//创建新的气球
+			var b1 = new Balloon();
+			setInterval(function(){
+				b1.move();
+			},1000/25)
+			
+		</script>
+	</body>
+</html>

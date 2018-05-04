@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<style>
+			html,body{height:100%;}
+			body{
+				position:relative; /*父元素相对定位*/
+				overflow:hidden;  /*溢出隐藏*/
+			}
+			body{
+				background-repeat: no-repeat;
+				background-size:100% 100%;
+			}
+			.balloon{
+				position:absolute;  /*子元素绝对定位*/
+				width:96px;
+				height:122px;
+				background-image: url(img/balloon.png);
+				background-repeat: no-repeat;
+				z-index:1;
+			}
+			.baozha{
+				animation: move1 .5s ease-in-out forwards;
+			}
+			@keyframes move1{
+				0%{transform:scale(1);opacity:1;}
+				100%{transform:scale(20);opacity:0;}
+			}
+			.frameIndex{
+				position:absolute;
+			    right:20px;
+			    top:20px;
+			    }
+			.cloud{
+				width:200px;
+				height:100px;
+				background:url(img/cloud.png);
+				background-size:100% 100%;
+				position:absolute;
+				z-index:0;
+			}
+			.score{position: absolute;}
+			.gun{
+				position:absolute;
+				z-index:2;
+				width:96px;
+				height:96px;
+				top:200px;
+				left:200px;
+				background:url(img/gun.png);
+			}
+			.addscore{
+				position:absolute;
+				z-index:4;
+				display:none;
+				left:40px;
+				top:5px;
+				color:#fff;
+			}
+			.move1{
+				animation:addscore .5s ease-in-out forwards; display:block;
+			}
+			@keyframes addscore{
+				0%{transform: scale(3);}
+				100%{transform: scale(0); opacity:0;}
+			}
+		</style>
+	</head>
+	<body>
+		<div class="frameIndex"></div>
+		<script src="js/unit.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/Balloon.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/Cloud.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/background.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/score.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/gun.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/addScore.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/game.js" type="text/javascript" charset="utf-8"></script>
+		<script>
+			//导演开始
+			game.start();
+		</script>
+	</body>
+</html>

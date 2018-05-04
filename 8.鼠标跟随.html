@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<style>
+			html,body{height:100%;}
+			body{
+				position:relative; /*父元素相对定位*/
+				overflow:hidden;  /*溢出隐藏*/
+			}
+			body{
+				/*background-image:url("img/bg.jpg");*/
+				background-repeat: no-repeat;
+				background-size:100% 100%;
+			}
+			.balloon{
+				position:absolute;  /*子元素绝对定位*/
+				width:96px;
+				height:122px;
+				background-image: url(img/balloon.png);
+				background-repeat: no-repeat;
+				z-index:1;
+				/*background-position: 0px -122px;*/
+			}
+			.baozha{
+				animation: move1 .5s ease-in-out forwards;
+			}
+			@keyframes move1{
+				0%{transform:scale(1);opacity:1;}
+				100%{transform:scale(20);opacity:0;}
+			}
+			.frameIndex{
+				position:absolute;
+			    right:20px;
+			    top:20px;
+			    }
+			.cloud{
+				width:200px;
+				height:100px;
+				background:url(img/cloud.png);
+				background-size:100% 100%;
+				position:absolute;
+				z-index:0;
+			}
+			.score{position: absolute;}
+			.gun{
+				position:absolute;
+				z-index:0;
+				width:96px;
+				height:96px;
+				top:200px;
+				left:200px;
+				background:url(img/gun.png);
+			}
+		</style>
+	</head>
+	<body>
+		<div class="frameIndex"></div>
+		<script>
+			//每个图片的位置坐标
+			var markList = {
+				"1" : "0px 0px",
+				"2" : "-96px 0px",
+				"3" : "-192px 0px",
+				"4" : "-288px 0px",
+				"5" : "opx -122px",
+				"6" : "-96px -122px",
+				"7" : "-192px -122px",
+				"8" : "-288px -122px"
+			}
+			
+			//取一个m到n之间的随机正数
+			function r(m,n){
+				//[m,n]
+				var r1 = Math.random(); // [ 0, 1) 随机数
+				var r2 = (n-m+1)*r1   ;//  [ 0, n-m+1)
+				var r3 = m + r2       ;//  [ m, n+1)
+				var r4 = Math.floor(r3);// [ m, n] 向下取整
+				return r4;
+			}
+			
+			
+			//气球函数的构造器
+			function Balloon(){
+
+				//4,元素：ele,用来承载气球的dom元素
+				this.ele = document.createElement("div");
+				this.ele.className = "balloon";
+				
+				var that = this;
+				//console.info(that);
+				
+				this.ele.addEventListener("click",function(){
+					
+					//console.info("气球被点击了",that.mark);
+					//枪声
+					var v1 = new Audio("img/gun.mp3");
+					v1.play();
+					
+					that.blow();
+					
+					game.updateScore(that.mark);
+					//获取当前的分数
+				})
+				this.ele.addEventListener("animationend",function(){
+					that.birth();
+				})
+				
+				document.body.appendChild(this.ele);
+				
+				//调用重生方法，精简代码量
+				this.birth();
+			}
+			
+			//用构造器+原型的方式去创建气球对象
+			Balloon.prototype = {
+				constructor:Balloon,
+				move:function(){
+					//不断地减少y值
+					this.y = this.y - this.speed;
+					if(this.y < -122){
+						//飞出界，要重生
+						this.birth();
+					}
+					else{
+						//反馈到dom元素上
+					    this.ele.style.top = this.y + "px";
+					}
+				},
+				blow:function(){
+					this.ele.className = "balloon baozha";
+				},
+				birth:function(){
+					this.ele.className = "balloon";
+					//属性
+					//1,分值：（对应不同的背景图），mark
+					this.mark = r(1,8);
+					//2,速度：speed 让速度与分值成正比
+					this.speed = this.mark;
+					//3,坐标：x，y 随机的位置
+					this.x = r(0,document.body.offsetWidth - 96);
+					//this.y = document.body.offsetHeight + 2*122;
+					this.y = 500;
+					//根据分值设置背景图
+					this.ele.style.backgroundPosition = markList[ this.mark ];
+					//反馈到dom元素上
+					this.ele.style.left = this.x + "px";
+					this.ele.style.top = this.y + "px";
+				}
+			}
+			
+			//云朵对象
+			function Cloud(){
+				//ele
+				this.ele = document.createElement("div");
+				this.ele.className = "cloud";
+				document.body.appendChild(this.ele);
+				
+				this.birth();
+			}
+			Cloud.prototype = {
+				constructor:Cloud,
+				move:function(){
+					if(this.x < - this.w){
+						//console.info("重生。。。。。。。。");
+						this.birth();
+					}
+					else{
+						this.x = this.x - this.speed;
+					    this.ele.style.left = this.x + "px";
+					}
+				},
+				birth:function(){
+					//随机的坐标
+					this.x = r(document.body.offsetWidth,document.body.offsetWidth+10);
+					this.y = r(10,250);
+					this.ele.style.left = this.x + "px";
+					this.ele.style.top = this.y + "px";
+					//随机的宽高
+					this.w = r(80,180);
+					this.ele.style.width = this.w + "px";
+					this.ele.style.height = this.w/2 + "px";
+					
+					//向左移动随机的速度
+					this.speed = r(2,5);
+				}
+			}
+			
+			//背景对象
+			var background = {
+				bgurl:"img/bg.jpg",
+				set:function(yourbgurl){
+					if(yourbgurl === undefined){
+						yourbgurl = this.bgurl
+					}
+					document.body.style.backgroundImage = "url("+ yourbgurl +")";
+				}
+			}
+			
+			//分数对象
+			var score = {
+				ele:document.createElement("div"),
+				set:function(){
+					this.ele.className = "score";
+					//把它加到body上面
+					document.body.appendChild(this.ele);
+				},
+				update:function(yourscore){
+					this.ele.innerHTML = "得分：" + yourscore
+				}
+			}
+			
+			//枪对象
+			var gun = {
+				ele:document.createElement("div"),
+				set:function(){
+					this.ele.className = "gun";
+					document.body.appendChild(this.ele);
+				},
+				update:function(mousex,mousey){
+					//更新枪的位置，让它实现鼠标跟随的效果
+					var left = mousex - 96/2;
+					var top = mousey - 96/2;
+					
+					this.ele.style.left = left + "px";
+					this.ele.style.top = top + "px";
+				}
+			}
+			
+			
+			
+			//导演对象
+			var game = {
+				totalscore : 0, //总分数 
+				frameIndex : 0,   //记录当前的游戏已经进行了多少帧
+				balloonNumber:6,  //气球的数量
+				ballFrequently:25, //50:2s; 25:1s 产生一个气球；这个值越大，产生气球越慢
+				cloudNumber:10,     //云朵的数量
+				actor:[],//演员不止一个，所以用一个数组来表示
+				updateScore:function(yourscore){
+					this.totalscore += yourscore;
+					score.update(this.totalscore);
+				},
+				start:function(){
+					var currentballoonNumber = 0; //当前的气球的数量
+					var currentcloudNuber    = 0; //当前的云朵的数量
+					var that = this;
+					
+					//做一些初始化的工作
+					background.set();
+					score.set();
+					gun.set();
+					
+					document.body.addEventListener("mousemove",function(e){
+						//console.info(e.clientX,e.clientY)
+						gun.update(e.clientX,e.clientY);
+					})
+					
+	
+					setInterval(function(){
+						that.frameIndex++;
+						if(that.frameIndex % that.ballFrequently == 0 && currentballoonNumber < that.balloonNumber){
+							that.actor.push( new Balloon() );
+							currentballoonNumber++;
+						}
+						
+						if(that.frameIndex % (that.ballFrequently*5) == 0 && currentcloudNuber < that.cloudNumber){
+							that.actor.push( new Cloud() );
+							currentcloudNuber++;
+						}
+						//更新到dom上
+						document.querySelector(".frameIndex").innerHTML = "游戏进行了：" + that.frameIndex + "帧";
+						
+						//不断让演员动起来，调用每一个演员的move方法
+						for(var i = 0; i < that.actor.length;i++){
+							that.actor[i].move();
+						}
+					},1000/25)
+				}
+			}
+			
+			
+			//导演开始
+			game.start();
+			
+
+		</script>
+	</body>
+</html>
